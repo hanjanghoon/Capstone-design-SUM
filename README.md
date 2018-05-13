@@ -21,7 +21,7 @@
 | date           | datetime     | YES  |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP |
 
 
-### 2018.05.09
+### 2018.05.13
 
 * Server connection
 * DataBase table fixed for asynchronization
