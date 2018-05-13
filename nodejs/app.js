@@ -1,6 +1,6 @@
 var express = require('express');
 var mysql = require('mysql');
-var cron =require('node-cron');
+var cron = require('node-cron');
 
 var app = express();
 var port = 3000;
@@ -22,34 +22,36 @@ connection.connect(function(err){
     console.log('mysql connected');
 });
 
-function insert_db(query)
-{
-    var data = {};
-    data.dust_i = query.dust_i;
-    data.co2_i = query.co2_i;
-    data.temperature_i = query.temperature_i;
-    data.humidity_i = query.humidity_i;
-    
-    data.dust_o = query.dust_o;
-    data.co2_o = query.co2_o;
-    data.temperature_o = query.temperature_o;
-    data.humidity_o = query.humidity_o;
-
-    data.fan = query.fan;
-    var sql = connection.query('insert into sensor set ?', data, function(err,row,col){
-        if(err) throw err;
-        console.log('databasse insertion don = %j',data);
-    });
-}
-
-app.get('/insert',(req,res)=>{
+app.get('/update',(req, res)=>{
     var query = req.query;
+    
+    function insert_db(query)
+    {
+        var sql = "INSERT INTO " + query.tab_name + " (dust_pm25, dust_pm10, humidity, temperature, co2) VALUES ?";
+        var value = [
+            [query.dust_pm25, query.dust_pm10, query.humidity, query.temperature, query.co2]
+        ];
+        connection.query(sql, [value], function(err,res){
+            if(err) throw err;
+            console.log(res);
+        });    
+    }
     insert_db(query);
-    res.send('Database insertion done');
+    
+    res.send(query);
 });
 
+/*
 cron.schedule('0,10,20,30,40,50 * * * * *', function(req,res){
-    var sql = 'select * from sensors';
+    var sql = 'select * from indoor';
+    connection.query(sql,function(err,row,col){
+        if(err){
+            throw err;
+            return;
+        }
+        console.log(row);
+    });
+    sql = 'select * from outdoor';
     connection.query(sql,function(err,row,col){
         if(err){
             throw err;
@@ -58,6 +60,7 @@ cron.schedule('0,10,20,30,40,50 * * * * *', function(req,res){
         console.log(row);
     });
 });
+*/
 
 app.listen(port,()=>{
     console.log('listening to port ' + port);
