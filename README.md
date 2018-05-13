@@ -28,6 +28,7 @@
 * DataBase insertion, selection test
 
 table 1 : indoor, table 2 : outdoor
+
 |Field           |Type          |Null  |Key  |Default            |Extra                        | 
 |:--------------:|:------------:|:----:|:---:|:-----------------:|:---------------------------:|   
 | id             | int(11)      | NO   | PRI | NULL              | auto_increment              |
