@@ -81,38 +81,47 @@ app.get('/download', (req,res) => {
 });
 
 app.get('/read', (req,res) => {
-    var sql = 'select * from indoor order by id desc limit 1';
     var indoor={};
     var outdoor={};
-    connection.query(sql,function(err,row,col){
-        if(err){
-            throw err;
-            return;
-        }
-        indoor = row[0];
-        console.log(indoor);
-    });
-    sql = 'select * from outdoor order by id desc limit 1';
-    connection.query(sql,function(err,row,col){
-        if(err){
-            throw err;
-            return;
-        }
-        outdoor = row[0];
-        console.log(outdoor);
+
+    var in_promise = new Promise(function (resolve, reject) {
+        var sql = 'select * from indoor order by id desc limit 1';
+        connection.query(sql,function(err,row,col){
+            if(err){
+                throw err;
+                return;
+            }
+            indoor = row[0];
+            //console.log(indoor);
+            //console.log("indoor end..");
+            resolve();
+        });
     });
 
-    console.log(indoor.temperature, outdoor.temperature);
+    var out_promise = new Promise(function (resolve, reject) {
+        sql = 'select * from outdoor order by id desc limit 1';
+        connection.query(sql,function(err,row,col){
+            if(err){
+                throw err;
+                return;
+            }
+            outdoor = row[0];
+            //console.log(outdoor);
+            //console.log("outdoor end..");
+            resolve();
+        });
+    });
 
-    
-    if(indoor.temperature > outdoor.temperature+2){
-        res.send('0');
-        console.log('0');
-    }
-    else {
-        res.send('1');
-        console.log('1');
-    }
+    Promise.all([in_promise, out_promise]).then(function (text){
+        //console.log(indoor.temperature, outdoor.temperature);
+        //console.log("end..");
+        if(indoor.temperature > 35)
+            res.send('0');
+        else 
+            res.send('1');
+    }, function (error) {
+
+    });
 });
 
 app.listen(port,()=>{
