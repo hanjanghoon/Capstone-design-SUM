@@ -122,7 +122,6 @@ app.get('/read', (req,res) => {
     }, function (error) {
 
     });
-
 });
 
 app.listen(port,()=>{
