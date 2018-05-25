@@ -1,6 +1,6 @@
 var express = require('express');
 var mysql = require('mysql');
-var cron = require('node-cron');
+var fs = require('fs');
 var json2csv = require('json2csv');
 var app = express();
 var port = 3000;
@@ -22,6 +22,37 @@ connection.connect(function(err){
     console.log('mysql connected');
 });
 
+app.get('/view', (req,res)=>{
+    var count = 900; 
+    var sql = "select * from (select temperature, id from indoor order by id desc limit 900) as A order by id asc"
+
+    connection.query(sql, function(err,row){
+        if(err){
+            throw err;
+            return;
+        }
+        /* temperature */
+        var sum = 0;
+        var json = [];
+        for(var i=0;i<900;i++){
+            if(i%30 == 29) {
+                var temperature = sum / 30;
+                json[parseInt(i/30)] = {temperature};
+                sum = 0;
+            }
+            sum+=row[i].temperature;
+        }
+        //console.log(json);
+        fs.open('line_chart.html','r',(err,fd)=> {
+            if(err){
+                throw err;
+            }
+            res.sendFile('line_chart.html',{root:__dirname});
+            res.append('Data', JSON.stringify(json));
+        });
+    });
+});
+
 app.get('/update',(req, res)=>{
     var query = req.query;
     
@@ -40,27 +71,6 @@ app.get('/update',(req, res)=>{
     res.send(query);
 });
 
-/*
-cron.schedule('0,10,20,30,40,50 * * * * *', function(req,res){
-    var sql = 'select * from indoor';
-    connection.query(sql,function(err,row,col){
-        if(err){
-            throw err;
-            return;
-        }
-        console.log(row);
-    });
-    sql = 'select * from outdoor';
-    connection.query(sql,function(err,row,col){
-        if(err){
-            throw err;
-            return;
-        }
-        console.log(row);
-    });
-});
-*/
-
 app.get('/download', (req,res) => {
     console.log('download csv file');
     var tab_name = req.query.tab_name;
@@ -71,10 +81,9 @@ app.get('/download', (req,res) => {
             throw err;
             return;
         }
-        if(tab_name == 'indoor')
-            res.attachment('indoor.csv');
-        else if(tab_name == 'outdoor');
-            res.attachment('outdoor.csv');
+        var file_name = tab_name + ".csv";
+        res.attachment(file_name);
+        console.log(file_name);
         var output = json2csv.parse(row);
         res.status(200).send(output);
     });
@@ -115,14 +124,16 @@ app.get('/read', (req,res) => {
     Promise.all([in_promise, out_promise]).then(function (text){
         //console.log(indoor.temperature, outdoor.temperature);
         //console.log("end..");
-        if(indoor.temperature > 35)
+        if(indoor.temperature > 30)
             res.send('0');
         else 
             res.send('1');
     }, function (error) {
 
     });
+
 });
+
 
 app.listen(port,()=>{
     console.log('listening to port ' + port);
