@@ -23,8 +23,8 @@ connection.connect(function(err){
 });
 
 app.get('/view', (req,res)=>{
-    var count = 900; 
-    var sql = "select * from (select temperature, id from indoor order by id desc limit 900) as A order by id asc"
+    var count = 900;
+    var sql = "select * from (select * from indoor order by id desc limit 900) as A order by id asc"
 
     connection.query(sql, function(err,row){
         if(err){
@@ -32,17 +32,40 @@ app.get('/view', (req,res)=>{
             return;
         }
         /* temperature */
-        var sum = 0;
+        var t_sum = 0;
+        var co2_sum = 0;
+        var dust_pm25_sum = 0;
+        var dust_pm10_sum = 0;
+        var h_sum = 0;
+        var time= 0;
         var json = [];
         for(var i=0;i<900;i++){
             if(i%30 == 29) {
-                var temperature = sum / 30;
-                json[parseInt(i/30)] = {temperature};
-                sum = 0;
+                var temperature = t_sum / 30;
+                var co2 = co2_sum / 30;
+                var dust_pm10 = dust_pm10_sum / 30;
+                var dust_pm25 = dust_pm25_sum / 30;
+                var humidity = h_sum /30;
+                time = String(row[i].time);
+                console.log(time);
+                
+                var obj = {}
+                obj[time] = [temperature, co2, dust_pm10, dust_pm25, humidity]
+                json[parseInt(i/30)] = obj;
+
+                t_sum = 0;
+                h_sum = 0;
+                co2_sum = 0;
+                dust_pm25_sum = 0;
+                dust_pm10_sum = 0;
             }
-            sum+=row[i].temperature;
+            t_sum+=row[i].temperature;
+            h_sum+=row[i].humidity;
+            co2_sum += row[i].co2;
+            dust_pm25_sum += row[i].dust_pm25;
+            dust_pm10_sum += row[i].dust_pm10;
         }
-        //console.log(json);
+        console.log(json);
         fs.open('line_chart.html','r',(err,fd)=> {
             if(err){
                 throw err;
