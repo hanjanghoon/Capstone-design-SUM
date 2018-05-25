@@ -23,20 +23,32 @@ connection.connect(function(err){
 });
 
 app.get('/view', (req,res)=>{
-    var sql = "select * from indoor order by id desc limit 10";
-    //var sql =  'select * from '+ tab_name + ' order by id asc';
-    
+    var count = 900; 
+    var sql = "select * from (select temperature, id from indoor order by id desc limit 900) as A order by id asc"
+
     connection.query(sql, function(err,row){
         if(err){
             throw err;
             return;
         }
-        fs.open('chart.html','r',(err,fd)=> {
+        /* temperature */
+        var sum = 0;
+        var json = [];
+        for(var i=0;i<900;i++){
+            if(i%30 == 29) {
+                var temperature = sum / 30;
+                json[parseInt(i/30)] = {temperature};
+                sum = 0;
+            }
+            sum+=row[i].temperature;
+        }
+        //console.log(json);
+        fs.open('line_chart.html','r',(err,fd)=> {
             if(err){
                 throw err;
             }
-            res.sendFile('chart.html',{root:__dirname});
-            res.append('Data', JSON.stringify(row));
+            res.sendFile('line_chart.html',{root:__dirname});
+            res.append('Data', JSON.stringify(json));
         });
     });
 });

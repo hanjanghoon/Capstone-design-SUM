@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      var request = new XMLHttpRequest();
+      request.open("GET","http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/view",true);
+      request.send();
+
+      var Data = [['key', 'value']];
+      request.onreadystatechange = function(){
+        if(this.readyState==this.HEADERS_RECEIVED){
+            var rowData = request.getResponseHeader("Data");
+            rowData = JSON.parse(rowData);
+            //console.log(rowData);
+            for(key in rowData){
+                for(property in rowData[key]){
+                    Data.push([property, rowData[key][property]]);
+                }
+            }
+        }
+      }
+      console.log(Data)
+
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable(Data);
+        console.log(data);
+
+        var options = {
+          title: 'Company Performance'
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+  </body>
+</html>
