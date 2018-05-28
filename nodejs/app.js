@@ -22,35 +22,69 @@ connection.connect(function(err){
     console.log('mysql connected');
 });
 
+app.get('/graph', (req,res)=>{
+    fs.open('graph.html','r',(err,fd)=>{
+        if(err){
+            throw err;
+        }
+        res.sendFile('graph.html',{root:__dirname});
+    });
+});
+
 app.get('/view', (req,res)=>{
-    var count = 900; 
-    var sql = "select * from (select temperature, id from indoor order by id desc limit 900) as A order by id asc"
+    var count = req.query.cnt;
+    var sql = "select * from (select * from indoor order by id desc limit "+ String(count) +") as A order by id asc";
+    var offset = 30*(count/900);
+    console.log(count);
+    console.log(sql);
+    console.log(offset);
 
     connection.query(sql, function(err,row){
         if(err){
             throw err;
             return;
         }
-        /* temperature */
-        var sum = 0;
+        var t_sum = 0;
+        var co2_sum = 0;
+        var dust_pm25_sum = 0;
+        var dust_pm10_sum = 0;
+        var h_sum = 0;
+        var time= 0;
         var json = [];
-        for(var i=0;i<900;i++){
-            if(i%30 == 29) {
-                var temperature = sum / 30;
-                json[parseInt(i/30)] = {temperature};
-                sum = 0;
+        
+        for(var i=0;i<count;i++){
+            if(i%offset == offset-1) {
+                var temperature = t_sum /offset;
+                var co2 = co2_sum / offset;
+                var dust_pm10 = dust_pm10_sum / offset;
+                var dust_pm25 = dust_pm25_sum / offset;
+                var humidity = h_sum /offset;
+                time = String(row[i].time);
+                
+                var obj = {}
+                obj[time] = [temperature, co2, dust_pm10, dust_pm25, humidity]
+                json[parseInt(i/offset)] = obj;
+
+                t_sum = 0;
+                h_sum = 0;
+                co2_sum = 0;
+                dust_pm25_sum = 0;
+                dust_pm10_sum = 0;
             }
-            sum+=row[i].temperature;
+            t_sum+=row[i].temperature;
+            h_sum+=row[i].humidity;
+            co2_sum += row[i].co2;
+            dust_pm25_sum += row[i].dust_pm25;
+            dust_pm10_sum += row[i].dust_pm10;
         }
-        //console.log(json);
         fs.open('line_chart.html','r',(err,fd)=> {
             if(err){
                 throw err;
             }
             res.sendFile('line_chart.html',{root:__dirname});
-            res.append('Data', JSON.stringify(json));
+            res.append('Data', JSON.stringify(json));;
         });
-    });
+    });  
 });
 
 app.get('/update',(req, res)=>{
@@ -101,8 +135,6 @@ app.get('/read', (req,res) => {
                 return;
             }
             indoor = row[0];
-            //console.log(indoor);
-            //console.log("indoor end..");
             resolve();
         });
     });
@@ -115,15 +147,11 @@ app.get('/read', (req,res) => {
                 return;
             }
             outdoor = row[0];
-            //console.log(outdoor);
-            //console.log("outdoor end..");
             resolve();
         });
     });
 
     Promise.all([in_promise, out_promise]).then(function (text){
-        //console.log(indoor.temperature, outdoor.temperature);
-        //console.log("end..");
         if(indoor.temperature > 30)
             res.send('0');
         else 
