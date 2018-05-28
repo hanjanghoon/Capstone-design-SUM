@@ -32,9 +32,16 @@ table 1 : indoor, table 2 : outdoor
 |Field           |Type          |Null  |Key  |Default            |Extra                        | 
 |:--------------:|:------------:|:----:|:---:|:-----------------:|:---------------------------:|   
 | id             | int(11)      | NO   | PRI | NULL              | auto_increment              |
-| dust_pm25      | decimal(5,2) | YES  |     | NULL              |                             |
+| dust_pm25      | decimal(5,2) | YES  |     | NULL              |                             |
 | dust_pm10      | decimal(5,2) | YES  |     | NULL              |                             |
 | humidity       | decimal(5,2) | YES  |     | NULL              |                             |
 | temperature    | decimal(4,2) | YES  |     | NULL              |                             |
 | co2            | int(4)       | YES  |     | NULL              |                             |
 | time           | timestamp    | no   |     | CURRENT_TIMESTAMP |                             |
+
+
+### 2018.05.16
+* Server - Arduino Connection (fan control)
+* CSV download added
+[indoor data download](http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/download?tab_name=indoor)
+[outdoor data download](http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/download?tab_name=outdoor)

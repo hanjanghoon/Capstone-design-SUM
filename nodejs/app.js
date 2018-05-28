@@ -44,6 +44,7 @@ app.get('/view', (req,res)=>{
             throw err;
             return;
         }
+      
         var t_sum = 0;
         var co2_sum = 0;
         var dust_pm25_sum = 0;
@@ -51,7 +52,7 @@ app.get('/view', (req,res)=>{
         var h_sum = 0;
         var time= 0;
         var json = [];
-        
+
         for(var i=0;i<count;i++){
             if(i%offset == offset-1) {
                 var temperature = t_sum /offset;
@@ -77,6 +78,7 @@ app.get('/view', (req,res)=>{
             dust_pm25_sum += row[i].dust_pm25;
             dust_pm10_sum += row[i].dust_pm10;
         }
+      
         fs.open('line_chart.html','r',(err,fd)=> {
             if(err){
                 throw err;
