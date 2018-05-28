@@ -1,0 +1,57 @@
+<head>
+    <style>
+
+.dropbtn {
+    background-color: #FFFFFF;
+    color: black;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+}
+
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: relative;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content li {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    border: 2px #555555;
+}
+
+.dropdown-content li:hover {background-color: #ddd;}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #AAAAAA;
+}
+    </style>
+    <!--<link rel="stylesheet" type="text/html" href="ec2-13-209-19.156.ap-northeast-2.compute.amazonaws.com:3000/view.css" />-->
+</head>
+<body>
+<div class="dropdown">
+<button class="dropbtn"> view </button>
+<div class="dropdown-content">
+    <li onclick="location.href='http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/view?cnt=900';" style="cursor:pointer;"> 5분</li>
+    <li onclick="location.href='http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/view?cnt=1800';" style="cursor:pointer;"> 10분 </li>
+    <li onclick="location.href='http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/view?cnt=3600';" style="cursor:pointer;"> 20분 </li>
+    <li onclick="location.href='http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/view?cnt=10800';" style="cursor:pointer;"> 1시간 </li>
+</div>
+</div>
+</body>
