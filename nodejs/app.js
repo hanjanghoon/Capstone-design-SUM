@@ -36,7 +36,12 @@ app.get('/view', (req,res)=>{ // not for access
     var interval = req.query.cnt;
     var offset = 30;
     var count = interval * offset;
-    var sql = "select * from (select * from indoor order by id desc limit "+ String(count) + ") as A order by id asc";
+    var format = "'%H:%i'";
+    
+    if(interval > 59)
+        format = "'%e{} %H[]'";
+
+    var sql = "select temperature, humidity, co2, dust_pm10, dust_pm25, DATE_FORMAT(time," + format + ") as time from (select * from indoor order by id desc limit "+ String(count) + ") as A order by id asc";
 
     connection.query(sql, function(err,row){
         if(err){
@@ -51,6 +56,8 @@ app.get('/view', (req,res)=>{ // not for access
         var time= 0;
         var json = [];
  
+        console.log(row)
+
         for(var i=0;i<count;i++){
             if(i%interval == interval - 1) {
                 var temperature = t_sum / interval;
@@ -147,13 +154,15 @@ app.get('/read', (req,res) => {
     });
 
     Promise.all([in_promise, out_promise]).then(function (text){
-        if(indoor.temperature > 30)
+        if(indoor.temperature > 27)
             res.send('0');
         else 
             res.send('1');
     }, function (error) {
 
     });
+
+    }
 
 });
 

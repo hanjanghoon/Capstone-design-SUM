@@ -3,7 +3,7 @@
 <head>
 <style>
 .dropbtn {
-    background-color: #FFFFFF;
+    background-color: #ABCDEF;
     color: black;
     padding: 16px;
     font-size: 16px;
@@ -14,12 +14,14 @@
 .dropdown {
     position: relative;
     display: inline-block;
+    background-color : #ABCDEF;
+    width : 100%;
 }
 
 .dropdown-content {
     display: none;
     position: relative;
-    background-color: #f1f1f1;
+    background-color: #ABCDEF;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
@@ -33,17 +35,18 @@
     border: 2px #555555;
 }
 
-.dropdown-content li:hover {background-color: #ddd;}
+.dropdown-content li:hover {
+    background-color: #ddd;
+}
 
 .dropdown:hover .dropdown-content {
     display: block;
 }
 
 .dropdown:hover .dropbtn {
-    background-color: #AAAAAA;
+    background-color: #ABCDEF;
 }
 </style>
-<!-- <script type="text/javascript" src="https://www.google.com/jsapi"></script> -->
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
     function loadData(interval) {
@@ -57,38 +60,39 @@
         var pm10 = [['time', 'pm10']]
         var pm25 = [['time', 'pm25']]
         var humidity = [['time', 'humidity']]
-
-        console.log(request)
+        
         request.onreadystatechange = function(){
-            console.log(request.getAllResponseHeaders())
             if(this.readyState == 4 && this.status == 200){
                 var rowData = request.getResponseHeader("Data");
                 rowData = JSON.parse(rowData);
                 for(key in rowData){
                     for(property in rowData[key]){
-                        temperature.push([property, rowData[key][property][0]]);
-                        co2.push([property, rowData[key][property][1]]);
-                        pm10.push([property, rowData[key][property][2]]);
-                        pm25.push([property, rowData[key][property][3]]);
-                        humidity.push([property, rowData[key][property][4]]);
+                        var str_property = property
+                        if(interval > 59)
+                            str_property = str_property.replace('{}', '일').replace('[]', '시');
+                        
+                        temperature.push([str_property, Number(rowData[key][property][0])]);
+                        co2.push([str_property, Number(rowData[key][property][1])]);
+                        pm10.push([str_property, Number(rowData[key][property][2])]);
+                        pm25.push([str_property, Number(rowData[key][property][3])]);
+                        humidity.push([str_property, Number(rowData[key][property][4])]);
                     }
                 }
-            }
+                google.charts.load('current', {packages:["corechart"]}); 
+
+                google.charts.setOnLoadCallback(function() {
+                    drawChart(temperature, 'temperature', 'chart_temperature');
+                    drawChart(co2, 'co2', 'chart_co2');
+                    drawChart(humidity, 'humidity', 'chart_humidity');
+                    drawChart(pm10, 'pm10', 'chart_pm10');
+                    drawChart(pm25, 'pm2.5', 'chart_pm25');
+                });
+            }   
         }
 
-        // trouble shooting here -> dlwjdaud 
-        google.charts.load('current', {packages:["corechart"]}); 
-
-        google.charts.setOnLoadCallback(function() {
-            console.log("setOnLoadCallback join..");
-            
-            drawChart(co2, 'co2', 'chart_co2');
-            drawChart(humidity, 'humidity', 'chart_humidity');
-        });
 
         function drawChart(Data, name, id) {
             var data = google.visualization.arrayToDataTable(Data);
-            console.log(data);
 
             var options = {
                 title: name
@@ -102,13 +106,18 @@
 </head>
 <body>
 <div class="dropdown">
-<button class="dropbtn"> view </button>
-<div class="dropdown-content">
-    <li onclick="loadData(1);" style="cursor:pointer;"> 1 minute </li>
-    <li onclick="loadData(10);"; style="cursor:pointer;"> 10 minute </li>
-    <li onclick="loadData(60);" style="cursor:pointer;"> 1 hour </li>
+    <button class="dropbtn"> view </button> 
+    
+    <div class="dropdown-content" style="width:20%">
+        <li onclick="loadData(1);" style="cursor:pointer;"> 1 minute </li>
+        <li onclick="loadData(10);"; style="cursor:pointer;"> 10 minute </li>
+        <li onclick="loadData(60);" style="cursor:pointer;"> 1 hour </li>
+    </div>
 </div>
-<div id="chart_co2" style="width: 900px; height: 500px;"></div>
-<div id="chart_humidity" style="width: 900px; height: 500px;"></div>
+<div id="chart_temperature" style="width: 400px; height: 300px; float :left;"></div>
+<div id="chart_co2" style="width: 400px; height: 300px; float: left;"></div>
+<div id="chart_humidity" style="width: 400px; height: 300px; float: left;"></div>
+<div id="chart_pm10" style="width: 400px; height: 300px; float: left;"></div>
+<div id="chart_pm25" style="width: 400px; height: 300px; float: left;"></div>
 </body>
 </html>
