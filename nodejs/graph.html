@@ -43,7 +43,8 @@
     background-color: #AAAAAA;
 }
 </style>
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<!-- <script type="text/javascript" src="https://www.google.com/jsapi"></script> -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
     function loadData(interval) {
         var request = new XMLHttpRequest();
@@ -76,9 +77,9 @@
         }
 
         // trouble shooting here -> dlwjdaud 
-        //google.load("visualization", "1", {packages:["corechart"]}); 
+        google.charts.load('current', {packages:["corechart"]}); 
 
-        google.setOnLoadCallback(function() {
+        google.charts.setOnLoadCallback(function() {
             console.log("setOnLoadCallback join..");
             
             drawChart(co2, 'co2', 'chart_co2');
