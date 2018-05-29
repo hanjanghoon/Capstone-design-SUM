@@ -1,6 +1,7 @@
+<!DOCTYPE html>
+<html>
 <head>
-    <style>
-
+<style>
 .dropbtn {
     background-color: #FFFFFF;
     color: black;
@@ -41,17 +42,72 @@
 .dropdown:hover .dropbtn {
     background-color: #AAAAAA;
 }
-    </style>
-    <!--<link rel="stylesheet" type="text/html" href="ec2-13-209-19.156.ap-northeast-2.compute.amazonaws.com:3000/view.css" />-->
+</style>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    function loadData(interval) {
+        var request = new XMLHttpRequest();
+        var url = "http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/view?cnt=" + String(interval)
+        request.open("GET", url, true);
+        request.send(null);
+
+        var temperature = [['time', 'temperature']]
+        var co2 = [['time', 'co2']]
+        var pm10 = [['time', 'pm10']]
+        var pm25 = [['time', 'pm25']]
+        var humidity = [['time', 'humidity']]
+
+        console.log(request)
+        request.onreadystatechange = function(){
+            console.log(request.getAllResponseHeaders())
+            if(this.readyState == 4 && this.status == 200){
+                var rowData = request.getResponseHeader("Data");
+                rowData = JSON.parse(rowData);
+                for(key in rowData){
+                    for(property in rowData[key]){
+                        temperature.push([property, rowData[key][property][0]]);
+                        co2.push([property, rowData[key][property][1]]);
+                        pm10.push([property, rowData[key][property][2]]);
+                        pm25.push([property, rowData[key][property][3]]);
+                        humidity.push([property, rowData[key][property][4]]);
+                    }
+                }
+            }
+        }
+
+        // trouble shooting here -> dlwjdaud 
+        //google.load("visualization", "1", {packages:["corechart"]}); 
+
+        google.setOnLoadCallback(function() {
+            console.log("setOnLoadCallback join..");
+            
+            drawChart(co2, 'co2', 'chart_co2');
+            drawChart(humidity, 'humidity', 'chart_humidity');
+        });
+
+        function drawChart(Data, name, id) {
+            var data = google.visualization.arrayToDataTable(Data);
+            console.log(data);
+
+            var options = {
+                title: name
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById(id));
+            chart.draw(data, options);
+        }
+    }
+</script>
 </head>
 <body>
 <div class="dropdown">
 <button class="dropbtn"> view </button>
 <div class="dropdown-content">
-    <li onclick="location.href='http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/view?cnt=900';" style="cursor:pointer;"> 5분</li>
-    <li onclick="location.href='http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/view?cnt=1800';" style="cursor:pointer;"> 10분 </li>
-    <li onclick="location.href='http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/view?cnt=3600';" style="cursor:pointer;"> 20분 </li>
-    <li onclick="location.href='http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/view?cnt=10800';" style="cursor:pointer;"> 1시간 </li>
+    <li onclick="loadData(1);" style="cursor:pointer;"> 1 minute </li>
+    <li onclick="loadData(10);"; style="cursor:pointer;"> 10 minute </li>
+    <li onclick="loadData(60);" style="cursor:pointer;"> 1 hour </li>
 </div>
-</div>
+<div id="chart_co2" style="width: 900px; height: 500px;"></div>
+<div id="chart_humidity" style="width: 900px; height: 500px;"></div>
 </body>
+</html>

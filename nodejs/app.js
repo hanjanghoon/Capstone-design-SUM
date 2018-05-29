@@ -27,24 +27,22 @@ app.get('/graph', (req,res)=>{
         if(err){
             throw err;
         }
+        console.log("open graph.html...");
         res.sendFile('graph.html',{root:__dirname});
     });
 });
 
-app.get('/view', (req,res)=>{
-    var count = req.query.cnt;
-    var sql = "select * from (select * from indoor order by id desc limit "+ String(count) +") as A order by id asc";
-    var offset = 30*(count/900);
-    console.log(count);
-    console.log(sql);
-    console.log(offset);
+app.get('/view', (req,res)=>{ // not for access
+    var interval = req.query.cnt;
+    var offset = 30;
+    var count = interval * offset;
+    var sql = "select * from (select * from indoor order by id desc limit "+ String(count) + ") as A order by id asc";
 
     connection.query(sql, function(err,row){
         if(err){
             throw err;
             return;
         }
-      
         var t_sum = 0;
         var co2_sum = 0;
         var dust_pm25_sum = 0;
@@ -52,19 +50,19 @@ app.get('/view', (req,res)=>{
         var h_sum = 0;
         var time= 0;
         var json = [];
-
+ 
         for(var i=0;i<count;i++){
-            if(i%offset == offset-1) {
-                var temperature = t_sum /offset;
-                var co2 = co2_sum / offset;
-                var dust_pm10 = dust_pm10_sum / offset;
-                var dust_pm25 = dust_pm25_sum / offset;
-                var humidity = h_sum /offset;
+            if(i%interval == interval - 1) {
+                var temperature = t_sum / interval;
+                var co2 = co2_sum / interval;
+                var dust_pm10 = dust_pm10_sum / interval;
+                var dust_pm25 = dust_pm25_sum / interval;
+                var humidity = h_sum / interval;
                 time = String(row[i].time);
                 
                 var obj = {}
                 obj[time] = [temperature, co2, dust_pm10, dust_pm25, humidity]
-                json[parseInt(i/offset)] = obj;
+                json[parseInt(i/interval)] = obj;
 
                 t_sum = 0;
                 h_sum = 0;
@@ -72,20 +70,15 @@ app.get('/view', (req,res)=>{
                 dust_pm25_sum = 0;
                 dust_pm10_sum = 0;
             }
+
             t_sum+=row[i].temperature;
             h_sum+=row[i].humidity;
             co2_sum += row[i].co2;
             dust_pm25_sum += row[i].dust_pm25;
             dust_pm10_sum += row[i].dust_pm10;
         }
-      
-        fs.open('line_chart.html','r',(err,fd)=> {
-            if(err){
-                throw err;
-            }
-            res.sendFile('line_chart.html',{root:__dirname});
-            res.append('Data', JSON.stringify(json));;
-        });
+        res.append('Data', JSON.stringify(json));
+        res.status(200).send()
     });  
 });
 
