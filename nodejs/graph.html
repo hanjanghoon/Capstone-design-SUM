@@ -20,7 +20,6 @@
 
 .dropdown-content {
     display: none;
-    position: relative;
     background-color: #ABCDEF;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
@@ -102,17 +101,38 @@
             chart.draw(data, options);
         }
     }
+
+    function manual(option){
+        var request = new XMLHttpRequest(); 
+        var url = "http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/write?manual="+String(option);
+
+        request.open("GET", url, true);
+        request.send(1);
+        console.log(url);
+    }
 </script>
 </head>
 <body>
+<div style="height:250px;">
+<div class="dropdown">
+    <button class="dropbtn"> manual </button> 
+    <div class="dropdown-content" style="width:20%">
+        <li onclick="manual(2);" style="cursor:pointer;">auto</li>
+        <li onclick="manual(1);" style="cursor:pointer;">on</li>
+        <li onclick="manual(0);" style="cursor:pointer;">off</li>
+    </div>
+</div>
+</div>
+<div style="height:250px;">
 <div class="dropdown">
     <button class="dropbtn"> view </button> 
     
     <div class="dropdown-content" style="width:20%">
         <li onclick="loadData(1);" style="cursor:pointer;"> 1 minute </li>
-        <li onclick="loadData(10);"; style="cursor:pointer;"> 10 minute </li>
+        <li onclick="loadData(10);" style="cursor:pointer;"> 10 minute </li>
         <li onclick="loadData(60);" style="cursor:pointer;"> 1 hour </li>
     </div>
+</div>
 </div>
 <div id="chart_temperature" style="width: 400px; height: 300px; float :left;"></div>
 <div id="chart_co2" style="width: 400px; height: 300px; float: left;"></div>
