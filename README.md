@@ -45,3 +45,13 @@ table 1 : indoor, table 2 : outdoor
 * CSV download added
 [indoor data download](http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/download?tab_name=indoor)
 [outdoor data download](http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/download?tab_name=outdoor)
+
+### 2018.05.17 ~ 06.01
+* Server - graph visualization added
+* Server - manual control functionality added
+* Server - auto ventilation determination method added
+* Arduino interval fix
+* Arduino validation rule added
+
+
+
