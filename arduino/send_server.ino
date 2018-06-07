@@ -14,8 +14,8 @@ const char * host = "ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com";
 String url = "/update?";
 const int httpPort = 3000;
 
-const char* ssid     = "netis_temp";
-const char* password = "18181818";
+const char* ssid     = "AndroidAP1081";
+const char* password = "12345679";
 
 void setup() {
   Serial.begin(9600);
@@ -48,17 +48,21 @@ void loop()
   while (p25 == 0 || p10 == 0) {
     sds.read(&p25, &p10);
   }
+  if(p25 > 999.99) p25 = 999.99;
+  if(p10 > 999.99) p10 = 999.99;
 
   // Read ppm (0 ~ 5000)
-  mySerial.write(cmd, 9);
-  mySerial.readBytes(response, 9);
-  if (response[8] != (0xff & (~(response[1] + response[2] + response[3] + response[4] + response[5] + response[6] + response[7]) + 1))) {
-    while (mySerial.available() > 0) {
-      mySerial.read();
+  int ppm=-1;
+  while(0 > ppm || ppm> 5000){
+    mySerial.write(cmd, 9);
+    mySerial.readBytes(response, 9);
+    if (response[8] != (0xff & (~(response[1] + response[2] + response[3] + response[4] + response[5] + response[6] + response[7]) + 1))) {
+     while (mySerial.available() > 0) {
+        mySerial.read();
+      }
     }
+  ppm = (response[2] << 8) | response[3];
   }
-  int ppm = (response[2] << 8) | response[3];
-
   // Read times
   // unsigned long times = millis();
 
@@ -74,8 +78,9 @@ void loop()
     Serial.println("connection failed: ");
     delay(500);
   }
+  String tab_name= "indoor";
   String payload = 
-    "tab_name=" + "indoor"
+    "tab_name=" + String(tab_name)+
     "&humidity=" + String(hum) + 
     "&temperature=" + String(temp) + 
     "&dust_pm25=" + String(p25) + 
@@ -94,5 +99,5 @@ void loop()
     Serial.println(line);
   }
 
-  delay(2500);
+  delay(54500);
 }
