@@ -1,21 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    
 <style>
-.dropbtn {
-    background-color: #ABCDEF;
-    color: black;
-    padding: 16px;
-    font-size: 16px;
-    border: none;
+#state{
+    text-align: center;
+    vertical-align: middle;
+}
+.col-sm-2 {
+    padding: 0px;
 }
 
+.col-sm-6{
+    padding: 0px;
+}
+
+.dropbtn {
+    background-color: #898989;
+    color: black;
+    padding: 16px;
+    font-size: 20px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border: 1px1px;
+    width: 100%;
+    height: 80px;
+    font-weight: bold;
+    font-family: "맑은고딕";
+}
 
 .dropdown {
     position: relative;
     display: inline-block;
-    background-color : #ABCDEF;
+    background-color : #FFFFFF;
     width : 100%;
+
 }
 
 .dropdown-content {
@@ -32,6 +51,7 @@
     text-decoration: none;
     display: block;
     border: 2px #555555;
+    text-align:center;
 }
 
 .dropdown-content li:hover {
@@ -43,7 +63,7 @@
 }
 
 .dropdown:hover .dropbtn {
-    background-color: #ABCDEF;
+    background-color: #9ABCDE;
 }
 </style>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -64,6 +84,7 @@
             if(this.readyState == 4 && this.status == 200){
                 var rowData = request.getResponseHeader("Data");
                 rowData = JSON.parse(rowData);
+                console.log(rowData)
                 for(key in rowData){
                     for(property in rowData[key]){
                         var str_property = property
@@ -105,39 +126,76 @@
     function manual(option){
         var request = new XMLHttpRequest(); 
         var url = "http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/write?manual="+String(option);
-
         request.open("GET", url, true);
+        if(option == 2) document.getElementById("state").innerHTML ="AUTO";
+        if(option == 1) document.getElementById("state").innerHTML ="ON";
+        if(option == 0) document.getElementById("state").innerHTML ="OFF";
+
         request.send(1);
-        console.log(url);
     }
+
+    function onload(){
+        var request = new XMLHttpRequest(); 
+        var url = "http://ec2-13-209-19-156.ap-northeast-2.compute.amazonaws.com:3000/state";
+        request.open("GET", url, true);
+        request.send(null);
+
+        request.onreadystatechange = function(){
+            if(this.readyState == 4 && this.status == 200){
+                var state = request.getResponseHeader("state");
+                console.log(state, document.getElementById("state"))
+
+                if(state == 2) document.getElementById("state").innerHTML ="AUTO";
+                if(state == 1) document.getElementById("state").innerHTML ="ON";
+                if(state == 0) document.getElementById("state").innerHTML ="OFF";
+            }
+        }
+    }
+
 </script>
 </head>
-<body>
-<div style="height:250px;">
-<div class="dropdown">
-    <button class="dropbtn"> manual </button> 
-    <div class="dropdown-content" style="width:20%">
-        <li onclick="manual(2);" style="cursor:pointer;">auto</li>
-        <li onclick="manual(1);" style="cursor:pointer;">on</li>
-        <li onclick="manual(0);" style="cursor:pointer;">off</li>
+<body onload="onload()">
+<div class="row">
+    <div class="dropdown col-sm-2">
+        <button class="dropbtn"> 설정변경 </button> 
+        <div class="dropdown-content">
+            <li onclick="manual(2);" style="cursor:pointer;">auto</li>
+            <li onclick="manual(1);" style="cursor:pointer;">on</li>
+            <li onclick="manual(0);" style="cursor:pointer;">off</li>
+        </div>
     </div>
-</div>
-</div>
-<div style="height:250px;">
-<div class="dropdown">
-    <button class="dropbtn"> view </button> 
+    <div class="dropdown col-sm-2">
+        <button class="dropbtn"> 그래프 </button> 
     
-    <div class="dropdown-content" style="width:20%">
-        <li onclick="loadData(1);" style="cursor:pointer;"> 1 minute </li>
-        <li onclick="loadData(10);" style="cursor:pointer;"> 10 minute </li>
-        <li onclick="loadData(60);" style="cursor:pointer;"> 1 hour </li>
+        <div class="dropdown-content" > 
+            <li onclick="loadData(1);" style="cursor:pointer;"> 10 second </li>
+            <li onclick="loadData(1);" style="cursor:pointer;"> 1 minute </li>
+            <li onclick="loadData(10);" style="cursor:pointer;"> 10 minute </li>
+            <li onclick="loadData(60);" style="cursor:pointer;"> 1 hour </li>
+        </div>
     </div>
+    <div class="dropdown col-sm-2">
+        <button class="dropbtn" id="state"></button> 
+    </div>
+    <div class="dropdown col-sm-6">
+        <button class="dropbtn"></button> 
+        <div class="dropdown-content">
+        </div>
+    </div>
+
+</div>
+<div class="row">
+<div class="col-sm-6">
+<div id="chart_temperature" style="height:300px; float :left;" class="col-sm-6"></div>
+<div id="chart_co2" style="height:300px; float: left;"  class="col-sm-6"></div>
 </div>
 </div>
-<div id="chart_temperature" style="width: 400px; height: 300px; float :left;"></div>
-<div id="chart_co2" style="width: 400px; height: 300px; float: left;"></div>
-<div id="chart_humidity" style="width: 400px; height: 300px; float: left;"></div>
-<div id="chart_pm10" style="width: 400px; height: 300px; float: left;"></div>
-<div id="chart_pm25" style="width: 400px; height: 300px; float: left;"></div>
+<div class="row">
+<div class="col-sm-6">
+<div id="chart_humidity" style="height:300px; float: left;" class="col-sm-6"></div>
+<div id="chart_pm10" style="height:300px; float: left;" class="col-sm-6"></div>
+<div id="chart_pm25"  style="height:300px; float: left;" class="col-sm-6"></div>
+</div>
+</div>
 </body>
 </html>
